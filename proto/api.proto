@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = ".;pb";
+
+message File {
+  string id_code = 1;
+  string name = 2;
+  uint32 size = 3;
+}
+enum MessageType {
+  MESSAGE_TYPE_UNKNOWN = 0;
+
+  MESSAGE_TYPE_UPLOAD_FILE_REQUEST = 1;
+  MESSAGE_TYPE_UPLOAD_FILE_RESPONSE = 2;
+
+  MESSAGE_TYPE_DOWNLOAD_FILE_REQUEST = 3;
+  MESSAGE_TYPE_DOWNLOAD_FILE_RESPONSE = 4;
+
+  MESSAGE_TYPE_LIST_FILES_REQUEST = 5;
+  MESSAGE_TYPE_LIST_FILES_RESPONSE = 6;
+
+  MESSAGE_TYPE_DELETE_FILE_REQUEST = 7;
+  MESSAGE_TYPE_DELETE_FILE_RESPONSE = 8;
+}
+
+message UploadFileRequest {
+  string file_name = 1;
+  string file_size = 2;
+}
+
+message UploadFileResponse {
+  string file_id = 1;
+  UploadFileResponseCode response_code = 2;
+}
+
+enum UploadFileResponseCode {
+  UPLOAD_FILE_RESPONSE_CODE_READY = 0;
+  UPLOAD_FILE_RESPONSE_CODE_SUCCESS = 1;
+  UPLOAD_FILE_RESPONSE_CODE_FAILED = 2;
+  UPLOAD_FILE_RESPONSE_CODE_EXISTS = 3;
+}
+
+message DownLoadFileRequest {
+  string file_id = 1;
+}
+
+message DownLoadFileResponse {
+  string file_name = 1;
+  string file_size = 2;
+}
+
+enum DownLoadFileResponseCode {
+  DOWNLOAD_FILE_RESPONSE_CODE_NOT_FOUND = 0;
+  DOWNLOAD_FILE_RESPONSE_CODE_OK = 1;
+}
+
+message DeleteFileRequest {
+  string file_id = 1;
+}
+
+message DeleteFileResponse {
+  DeleteFileResponse response_code = 1;
+}
+
+enum DeleteFileResponseCode {
+  DELETE_FILE_RESPONSE_CODE_NOT_FOUND = 0;
+  DELETE_FILE_RESPONSE_CODE_OK = 1;
+}
+
+message ListFilesRequest {
+  string token_key = 1;
+}
+
+message ListFilesResponse {
+  uint32 total_files = 1;
+}
