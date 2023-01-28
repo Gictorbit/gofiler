@@ -7,7 +7,9 @@ option go_package = ".;pb";
 message File {
   string id_code = 1;
   string name = 2;
-  uint32 size = 3;
+  uint32 size = 3; //in bytes
+  string extension = 4;
+  string checksum = 5;
 }
 enum MessageType {
   MESSAGE_TYPE_UNKNOWN = 0;
@@ -18,8 +20,8 @@ enum MessageType {
   MESSAGE_TYPE_DOWNLOAD_FILE_REQUEST = 3;
   MESSAGE_TYPE_DOWNLOAD_FILE_RESPONSE = 4;
 
-  MESSAGE_TYPE_LIST_FILES_REQUEST = 5;
-  MESSAGE_TYPE_LIST_FILES_RESPONSE = 6;
+  MESSAGE_TYPE_FILE_INFO_REQUEST = 5;
+  MESSAGE_TYPE_FILE_INFO_RESPONSE = 6;
 
   MESSAGE_TYPE_DELETE_FILE_REQUEST = 7;
   MESSAGE_TYPE_DELETE_FILE_RESPONSE = 8;
@@ -69,10 +71,10 @@ enum DeleteFileResponseCode {
   DELETE_FILE_RESPONSE_CODE_OK = 1;
 }
 
-message ListFilesRequest {
+message FileInfoRequest {
   string token_key = 1;
 }
 
-message ListFilesResponse {
-  uint32 total_files = 1;
+message FileInfoResponse {
+  File file_info = 1;
 }

@@ -44,7 +44,10 @@ func (s *Server) Start() {
 	s.ln = ln
 
 	go s.acceptConnections()
-	s.log.Info("server started", zap.String("ListenAddress", s.listenAddr))
+	s.log.Info("server started",
+		zap.String("ListenAddress", s.listenAddr),
+		zap.String("storagePath", s.storage),
+	)
 	<-s.quitChan
 }
 

@@ -82,6 +82,12 @@ func main() {
 				},
 				Action: func(ctx *cli.Context) error {
 					listenAddr := net.JoinHostPort(HostAddress, fmt.Sprintf("%d", PortNumber))
+					if _, e := os.Stat(StoragePath); os.IsNotExist(e) {
+						if mkdirErr := os.MkdirAll(StoragePath, os.ModePerm); mkdirErr != nil {
+							return mkdirErr
+						}
+						logger.Info("storage directory created", zap.String("Path", StoragePath))
+					}
 					server := tcpsrv.NewServer(listenAddr, logger, StoragePath)
 					logger.Info("admin password generated", zap.String("password", AdminPassword))
 					go server.Start()
