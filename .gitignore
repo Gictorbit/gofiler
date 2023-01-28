@@ -6,6 +6,8 @@ build
 build/*
 bin
 bin/*
+storage
+storage/*
 # Binaries for programs and plugins
 *.exe
 *.exe~

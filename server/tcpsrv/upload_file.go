@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"github.com/Gictorbit/gofiler/proto/pb"
+	"github.com/Gictorbit/gofiler/utils"
 	"io"
 	"net"
 	"os"
@@ -12,11 +13,13 @@ import (
 )
 
 func (s *Server) UploadFileHandler(req *pb.UploadFileRequest, conn net.Conn) (err error) {
-	fileID := generateRandomCode()
-	filePath := path.Join(s.storage, strings.TrimSpace(req.FileName))
+	reqFile := req.File
+	reqFile.IdCode = utils.GenerateRandomCode()
+
+	filePath := path.Join(s.storage, strings.TrimSpace(reqFile.Name))
 	defer func() {
 		resultResp := &pb.UploadFileResponse{
-			FileId: fileID,
+			IdCode: reqFile.IdCode,
 		}
 		if err != nil {
 			resultResp.ResponseCode = pb.UploadFileResponseCode_UPLOAD_FILE_RESPONSE_CODE_FAILED
@@ -40,7 +43,7 @@ func (s *Server) UploadFileHandler(req *pb.UploadFileRequest, conn net.Conn) (er
 		return err
 	}
 	readyResponse := &pb.UploadFileResponse{
-		FileId:       generateRandomCode(),
+		IdCode:       reqFile.IdCode,
 		ResponseCode: pb.UploadFileResponseCode_UPLOAD_FILE_RESPONSE_CODE_READY,
 	}
 	if e := s.SendResponse(conn, pb.MessageType_MESSAGE_TYPE_UPLOAD_FILE_RESPONSE, readyResponse); e != nil {

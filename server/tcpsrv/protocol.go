@@ -1,9 +1,7 @@
 package tcpsrv
 
 import (
-	"crypto/rand"
 	"errors"
-	"fmt"
 	"github.com/Gictorbit/gofiler/proto/pb"
 	"google.golang.org/protobuf/proto"
 	"net"
@@ -11,7 +9,6 @@ import (
 
 var (
 	ErrInvalidPacketSize = errors.New("invalid packet size")
-	RandomCodeLength     = 10
 )
 
 type PacketBody struct {
@@ -42,14 +39,6 @@ func (s *Server) SendResponsePacket(conn net.Conn, packet *PacketBody) error {
 		return err
 	}
 	return nil
-}
-
-func generateRandomCode() string {
-	b := make([]byte, RandomCodeLength)
-	if _, err := rand.Read(b); err != nil {
-		panic(err)
-	}
-	return fmt.Sprintf("%X", b)
 }
 
 func (s *Server) SendResponse(conn net.Conn, msgType pb.MessageType, msg proto.Message) error {

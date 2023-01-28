@@ -7,7 +7,7 @@ option go_package = ".;pb";
 message File {
   string id_code = 1;
   string name = 2;
-  uint32 size = 3; //in bytes
+  int64 size = 3; //in bytes
   string extension = 4;
   string checksum = 5;
 }
@@ -28,12 +28,11 @@ enum MessageType {
 }
 
 message UploadFileRequest {
-  string file_name = 1;
-  string file_size = 2;
+  File file = 1;
 }
 
 message UploadFileResponse {
-  string file_id = 1;
+  string id_code = 1;
   UploadFileResponseCode response_code = 2;
 }
 
@@ -45,12 +44,11 @@ enum UploadFileResponseCode {
 }
 
 message DownLoadFileRequest {
-  string file_id = 1;
+  string id_code = 1;
 }
 
 message DownLoadFileResponse {
-  string file_name = 1;
-  string file_size = 2;
+  File file = 1;
 }
 
 enum DownLoadFileResponseCode {
@@ -59,11 +57,12 @@ enum DownLoadFileResponseCode {
 }
 
 message DeleteFileRequest {
-  string file_id = 1;
+  string id_code = 1;
 }
 
 message DeleteFileResponse {
-  DeleteFileResponse response_code = 1;
+  File file = 1;
+  DeleteFileResponse response_code = 2;
 }
 
 enum DeleteFileResponseCode {
@@ -72,7 +71,7 @@ enum DeleteFileResponseCode {
 }
 
 message FileInfoRequest {
-  string token_key = 1;
+  string id_code = 1;
 }
 
 message FileInfoResponse {

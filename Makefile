@@ -3,6 +3,16 @@ build:
 	@echo "build server..."
 	go build -o bin/server github.com/Gictorbit/gofiler/server/cmd
 
+	@echo "build client..."
+	go build -o bin/client github.com/Gictorbit/gofiler/client/cmd
+
+release:
+	@echo "release server..."
+	go build -o bin/server -ldflags '-s' github.com/Gictorbit/gofiler/server/cmd
+
+	@echo "release client..."
+	go build -o bin/client -ldflags '-s' github.com/Gictorbit/gofiler/client/cmd
+
 .PHONY:compile
 compile:
 	@echo "Compiling for every OS and Platform"
@@ -14,3 +24,14 @@ run-server:
 	@echo "running server"
 	go build -o bin/server github.com/Gictorbit/gofiler/server/cmd
 	./bin/server start
+
+.PHONY:proto
+proto:
+	@echo "run proto linter..."
+	@cd proto && buf lint && cd -
+
+	@echo "format proto..."
+	@cd proto && buf format -w && cd -
+
+	@echo "generate proto..."
+	@cd proto && buf generate && cd -
