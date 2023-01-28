@@ -62,8 +62,5 @@ func (s *Server) UploadFileHandler(req *pb.UploadFileRequest, conn net.Conn) (er
 		}
 		currentByte += PacketMaxByteLength
 	}
-	if e := file.Close(); e != nil {
-		return e
-	}
-	return nil
+	return file.Close()
 }
