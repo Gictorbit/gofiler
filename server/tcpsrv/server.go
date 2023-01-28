@@ -17,33 +17,35 @@ type Empty struct{}
 
 type Server struct {
 	listenAddr string
+	storage    string
 	ln         net.Listener
 	quitChan   chan Empty
 	wg         sync.WaitGroup
 	log        *zap.Logger
 }
 
-func NewServer(listenAddr string, logger *zap.Logger) *Server {
+func NewServer(listenAddr string, logger *zap.Logger, storagePath string) *Server {
 	return &Server{
 		listenAddr: listenAddr,
 		quitChan:   make(chan Empty),
 		wg:         sync.WaitGroup{},
 		log:        logger,
+		storage:    storagePath,
 	}
 }
 
-func (s *Server) Start() error {
+func (s *Server) Start() {
 	ln, err := net.Listen(ServerSocketType, s.listenAddr)
 	if err != nil {
-		return err
+		s.log.Error("failed to listen", zap.Error(err))
+		return
 	}
 	defer ln.Close()
 	s.ln = ln
 
 	go s.acceptConnections()
-
+	s.log.Info("server started", zap.String("ListenAddress", s.listenAddr))
 	<-s.quitChan
-	return nil
 }
 
 func (s *Server) acceptConnections() {
@@ -84,4 +86,5 @@ func (s *Server) HandleConnection(conn net.Conn) {
 func (s *Server) Stop() {
 	s.wg.Wait()
 	s.quitChan <- Empty{}
+	s.log.Info("stop server")
 }

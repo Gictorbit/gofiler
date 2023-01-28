@@ -3,11 +3,15 @@ package main
 import (
 	"crypto/rand"
 	"fmt"
+	"github.com/Gictorbit/gofiler/server/tcpsrv"
 	"github.com/urfave/cli/v2"
 	"go.uber.org/zap"
 	"log"
+	"net"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"syscall"
 )
 
 var (
@@ -23,6 +27,7 @@ const (
 
 func main() {
 	logger, err := zap.NewProduction()
+	adminPassword := generateRandomPassword()
 	if err != nil {
 		log.Fatalf("create new logger failed:%v\n", err)
 	}
@@ -30,59 +35,71 @@ func main() {
 	if err != nil {
 		logger.Error("get pwd failed", zap.Error(err))
 	}
+	defaultStoragePath := filepath.Join(pwdPath, "storage")
+
 	app := &cli.App{
-		Name:  "file-server",
+		Name:  "server",
 		Usage: "go file transfer server",
 		Commands: []*cli.Command{
 			{
-				Name: "start",
+				Name:  "start",
+				Usage: "starts server",
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:        "host",
 						Usage:       "host address",
-						Value:       "localhost",
-						Aliases:     []string{"h"},
+						Value:       "127.0.0.1",
+						DefaultText: "127.0.0.1",
 						Destination: &HostAddress,
 						EnvVars:     []string{"HOST"},
-						Required:    true,
 					},
 					&cli.UintFlag{
 						Name:        "port",
 						Usage:       "server port number",
 						Value:       2023,
+						DefaultText: "2023",
 						Aliases:     []string{"p"},
 						Destination: &PortNumber,
 						EnvVars:     []string{"PORT"},
-						Required:    true,
 					},
 					&cli.PathFlag{
 						Name:        "storage",
 						Usage:       "storage directory path to save files",
-						Value:       filepath.Join(pwdPath, "storage"),
+						Value:       defaultStoragePath,
+						DefaultText: defaultStoragePath,
 						Destination: &StoragePath,
 						EnvVars:     []string{"STORAGE_PATH"},
 					},
 					&cli.StringFlag{
 						Name:        "password",
 						Usage:       "set admin password",
-						Value:       generateRandomPassword(),
+						Value:       adminPassword,
+						DefaultText: "a random password",
 						Aliases:     []string{"pass"},
 						Destination: &AdminPassword,
 						EnvVars:     []string{"ADMIN_PASSWORD"},
 					},
 				},
+				Action: func(ctx *cli.Context) error {
+					listenAddr := net.JoinHostPort(HostAddress, fmt.Sprintf("%d", PortNumber))
+					server := tcpsrv.NewServer(listenAddr, logger, StoragePath)
+					logger.Info("admin password generated", zap.String("password", AdminPassword))
+					go server.Start()
+
+					sigs := make(chan os.Signal, 1)
+					signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+					<-sigs
+					server.Stop()
+					return nil
+				},
 			},
 		},
-
-		Action: func(*cli.Context) error {
-			fmt.Println("boom! I say!")
-			return nil
-		},
 	}
 
-	if err := app.Run(os.Args); err != nil {
-		log.Fatal(err)
+	if e := app.Run(os.Args); e != nil {
+		logger.Error("failed to run app", zap.Error(e))
 	}
+
 }
 
 func generateRandomPassword() string {
