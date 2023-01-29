@@ -5,7 +5,9 @@ build:
 
 	@echo "build client..."
 	go build -o bin/client github.com/Gictorbit/gofiler/client/cmd
-
+.PHONE:clean
+clean:
+	@rm -r bin
 release:
 	@echo "release server..."
 	go build -o bin/server -ldflags '-s' github.com/Gictorbit/gofiler/server/cmd

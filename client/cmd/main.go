@@ -53,7 +53,9 @@ func main() {
 					listenAddr := net.JoinHostPort(HostAddress, fmt.Sprintf("%d", PortNumber))
 					log.Println("listen address is ", listenAddr)
 					client := tcpclient.NewClient(listenAddr, log.Default())
-					go client.Start()
+					if e := client.Connect(); e != nil {
+						log.Fatal(e)
+					}
 					if err := client.UploadFile(FilePath); err != nil {
 						log.Println("failed to upload file", err)
 						return err

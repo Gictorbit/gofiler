@@ -1,10 +1,10 @@
 package tcpsrv
 
 import (
-	"bytes"
 	"errors"
 	"github.com/Gictorbit/gofiler/proto/pb"
 	"github.com/Gictorbit/gofiler/utils"
+	"go.uber.org/zap"
 	"io"
 	"net"
 	"os"
@@ -15,7 +15,7 @@ import (
 func (s *Server) UploadFileHandler(req *pb.UploadFileRequest, conn net.Conn) (err error) {
 	reqFile := req.File
 	reqFile.IdCode = utils.GenerateRandomCode()
-
+	s.log.Info("receiving new file", zap.Any("File", reqFile))
 	filePath := path.Join(s.storage, strings.TrimSpace(reqFile.Name))
 	defer func() {
 		resultResp := &pb.UploadFileResponse{
@@ -36,6 +36,7 @@ func (s *Server) UploadFileHandler(req *pb.UploadFileRequest, conn net.Conn) (er
 		if e := s.SendResponse(conn, pb.MessageType_MESSAGE_TYPE_UPLOAD_FILE_RESPONSE, existsResp); e != nil {
 			return e
 		}
+		s.log.Warn("file already exists", zap.Any("File", req.GetFile()))
 		return nil
 	}
 	file, err := os.Create(filePath)
@@ -49,18 +50,8 @@ func (s *Server) UploadFileHandler(req *pb.UploadFileRequest, conn net.Conn) (er
 	if e := s.SendResponse(conn, pb.MessageType_MESSAGE_TYPE_UPLOAD_FILE_RESPONSE, readyResponse); e != nil {
 		return e
 	}
-	var currentByte int64 = 0
-	fileBuffer := make([]byte, 0)
-	for err == nil || err != io.EOF {
-		if _, e := conn.Read(fileBuffer); e != nil {
-			return e
-		}
-		cleanedFileBuffer := bytes.Trim(fileBuffer, "\x00")
-		_, err = file.WriteAt(cleanedFileBuffer, currentByte)
-		if len(string(fileBuffer)) != len(string(cleanedFileBuffer)) {
-			break
-		}
-		currentByte += PacketMaxByteLength
+	if _, e := io.Copy(file, conn); e != nil && e != io.EOF {
+		return e
 	}
 	return file.Close()
 }

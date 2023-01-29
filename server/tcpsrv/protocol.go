@@ -3,7 +3,9 @@ package tcpsrv
 import (
 	"errors"
 	"github.com/Gictorbit/gofiler/proto/pb"
+	"github.com/Gictorbit/gofiler/utils"
 	"google.golang.org/protobuf/proto"
+	"io"
 	"net"
 )
 
@@ -17,9 +19,9 @@ type PacketBody struct {
 }
 
 func (s *Server) ReadPacket(conn net.Conn) (*PacketBody, error) {
-	buf := make([]byte, PacketMaxByteLength)
+	buf := make([]byte, utils.PacketMaxByteLength)
 	n, err := conn.Read(buf)
-	if err != nil {
+	if err != nil && !errors.Is(err, io.EOF) {
 		return nil, err
 	}
 	return &PacketBody{
@@ -32,7 +34,7 @@ func (s *Server) SendResponsePacket(conn net.Conn, packet *PacketBody) error {
 	buf := make([]byte, 0)
 	buf = append(buf, byte(packet.MessageType))
 	buf = append(buf, packet.Payload...)
-	if len(buf) > PacketMaxByteLength {
+	if len(buf) > utils.PacketMaxByteLength {
 		return ErrInvalidPacketSize
 	}
 	if _, err := conn.Write(buf); err != nil {
