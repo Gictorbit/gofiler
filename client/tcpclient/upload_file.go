@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Gictorbit/gofiler/proto/pb"
 	"github.com/Gictorbit/gofiler/utils"
+	"github.com/jedib0t/go-pretty/v6/table"
 	"io"
 	"os"
 	"strings"
@@ -48,7 +49,7 @@ func (c *Client) UploadFile(fPath string) error {
 	c.log.Println("uploading file...")
 	io.CopyN(c.conn, file, reqFile.Size)
 
-	fmt.Println("file sent....")
+	c.log.Println("file sent....")
 	resultMsg, err := utils.ReadMessageFromConn(c.conn, &pb.UploadFileResponse{})
 	if err != nil {
 		return err
@@ -63,10 +64,16 @@ func (c *Client) UploadFile(fPath string) error {
 }
 
 func (c *Client) PrintFileInfo(file *pb.File) {
-	fmt.Println("####### FileInfo #########")
-	fmt.Printf("Name: %s\n", file.Name)
-	fmt.Printf("Extension: %s\n", file.Extension)
-	fmt.Printf("Size: %d\n", file.Size)
-	fmt.Printf("CheckSum: %s\n", file.Checksum)
-	fmt.Println("#########################")
+	fmt.Println("FileInfo:")
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{"file", "info"})
+	t.AppendRows([]table.Row{
+		{"Name", file.Name},
+		{"Extension", file.Extension},
+		{"Size", fmt.Sprintf("%d Bytes", file.Size)},
+		{"CheckSum", file.Checksum},
+	})
+	t.AppendSeparator()
+	t.Render()
 }
