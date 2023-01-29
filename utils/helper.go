@@ -14,9 +14,10 @@ import (
 )
 
 const (
-	RandomCodeLength    = 10
-	PacketMaxByteLength = 2048
-	ServerSocketType    = "tcp"
+	RandomCodeLength     = 10
+	PacketMaxByteLength  = 2048
+	ServerSocketType     = "tcp"
+	RandomPasswordLength = 15
 )
 
 var (
@@ -78,4 +79,12 @@ func ReadMessageFromConn[T proto.Message](conn net.Conn, message T) (*MessageBod
 	packet.Message = message
 
 	return packet, nil
+}
+
+func GenerateRandomPassword() string {
+	b := make([]byte, RandomPasswordLength)
+	if _, err := rand.Read(b); err != nil {
+		panic(err)
+	}
+	return fmt.Sprintf("%X", b)
 }

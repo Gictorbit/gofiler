@@ -1,9 +1,9 @@
 package main
 
 import (
-	"crypto/rand"
 	"fmt"
 	"github.com/Gictorbit/gofiler/server/tcpsrv"
+	"github.com/Gictorbit/gofiler/utils"
 	"github.com/urfave/cli/v2"
 	"go.uber.org/zap"
 	"log"
@@ -21,13 +21,9 @@ var (
 	AdminPassword string
 )
 
-const (
-	RandomPasswordLength = 15
-)
-
 func main() {
 	logger, err := zap.NewProduction()
-	adminPassword := generateRandomPassword()
+	adminPassword := utils.GenerateRandomPassword()
 	if err != nil {
 		log.Fatalf("create new logger failed:%v\n", err)
 	}
@@ -106,12 +102,4 @@ func main() {
 		logger.Error("failed to run app", zap.Error(e))
 	}
 
-}
-
-func generateRandomPassword() string {
-	b := make([]byte, RandomPasswordLength)
-	if _, err := rand.Read(b); err != nil {
-		panic(err)
-	}
-	return fmt.Sprintf("%X", b)
 }

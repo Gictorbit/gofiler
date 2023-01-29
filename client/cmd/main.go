@@ -7,15 +7,23 @@ import (
 	"log"
 	"net"
 	"os"
+	"path/filepath"
 )
 
 var (
 	HostAddress string
 	PortNumber  uint
 	FilePath    string
+	OutPath     string
+	ShareCode   string
 )
 
 func main() {
+	pwdPath, err := os.Getwd()
+	if err != nil {
+		log.Println("get pwd failed", err)
+	}
+	defaultOutPath := filepath.Join(pwdPath, "download")
 	app := &cli.App{
 		Name:  "client",
 		Usage: "go file transfer client",
@@ -58,6 +66,47 @@ func main() {
 					}
 					if err := client.UploadFile(FilePath); err != nil {
 						log.Println("failed to upload file", err)
+						return err
+					}
+					client.Stop()
+					return nil
+				},
+			},
+			{
+				Name:  "download",
+				Usage: "download a file from server",
+				Flags: []cli.Flag{
+					&cli.PathFlag{
+						Name:        "output",
+						Usage:       "output directory to save file",
+						Value:       defaultOutPath,
+						DefaultText: defaultOutPath,
+						Aliases:     []string{"o", "out"},
+						Destination: &OutPath,
+					},
+					&cli.PathFlag{
+						Name:        "code",
+						Usage:       "shared code of uploaded file",
+						Required:    true,
+						Aliases:     []string{"c"},
+						Destination: &ShareCode,
+					},
+				},
+				Action: func(ctx *cli.Context) error {
+					if _, e := os.Stat(defaultOutPath); os.IsNotExist(e) {
+						if mkdirErr := os.MkdirAll(defaultOutPath, os.ModePerm); mkdirErr != nil {
+							return mkdirErr
+						}
+						log.Println("output directory created", defaultOutPath)
+					}
+					listenAddr := net.JoinHostPort(HostAddress, fmt.Sprintf("%d", PortNumber))
+					log.Println("server address is ", listenAddr)
+					client := tcpclient.NewClient(listenAddr, log.Default())
+					if e := client.Connect(); e != nil {
+						log.Fatal(e)
+					}
+					if err := client.DownloadFile(OutPath, ShareCode); err != nil {
+						log.Println("failed to download file", err)
 						return err
 					}
 					client.Stop()

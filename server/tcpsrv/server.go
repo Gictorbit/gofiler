@@ -77,6 +77,16 @@ func (s *Server) HandleConnection(conn net.Conn) {
 			s.log.Error("handle upload file failed", zap.Error(err))
 			return
 		}
+	case pb.MessageType_MESSAGE_TYPE_DOWNLOAD_FILE_REQUEST:
+		req := &pb.DownLoadFileRequest{}
+		if e := proto.Unmarshal(packet.Payload, req); e != nil {
+			s.log.Error("unmarshal download request failed", zap.Error(err))
+			return
+		}
+		if e := s.DownloadFileHandler(req, conn); e != nil {
+			s.log.Error("handle download file failed", zap.Error(err))
+			return
+		}
 	}
 
 }
