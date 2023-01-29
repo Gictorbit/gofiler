@@ -51,7 +51,7 @@ func main() {
 				},
 				Action: func(ctx *cli.Context) error {
 					listenAddr := net.JoinHostPort(HostAddress, fmt.Sprintf("%d", PortNumber))
-					log.Println("listen address is ", listenAddr)
+					log.Println("server address is ", listenAddr)
 					client := tcpclient.NewClient(listenAddr, log.Default())
 					if e := client.Connect(); e != nil {
 						log.Fatal(e)

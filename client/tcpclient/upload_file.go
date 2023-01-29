@@ -59,13 +59,13 @@ func (c *Client) UploadFile(fPath string) error {
 	} else {
 		c.log.Println("upload file failed")
 	}
-	fmt.Println("File ID Code is: ", resultMsg.Message.GetIdCode())
+	c.PrintCode(resultMsg.Message.GetIdCode())
 	return nil
 }
 
 func (c *Client) PrintFileInfo(file *pb.File) {
-	fmt.Println("FileInfo:")
 	t := table.NewWriter()
+	t.SetStyle(table.StyleLight)
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"file", "info"})
 	t.AppendRows([]table.Row{
@@ -73,6 +73,18 @@ func (c *Client) PrintFileInfo(file *pb.File) {
 		{"Extension", file.Extension},
 		{"Size", fmt.Sprintf("%d Bytes", file.Size)},
 		{"CheckSum", file.Checksum},
+	})
+	t.AppendSeparator()
+	t.Render()
+}
+
+func (c *Client) PrintCode(code string) {
+	t := table.NewWriter()
+	t.SetStyle(table.StyleLight)
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{"file share code"})
+	t.AppendRows([]table.Row{
+		{code},
 	})
 	t.AppendSeparator()
 	t.Render()
