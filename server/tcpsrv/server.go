@@ -87,6 +87,26 @@ func (s *Server) HandleConnection(conn net.Conn) {
 			s.log.Error("handle download file failed", zap.Error(err))
 			return
 		}
+	case pb.MessageType_MESSAGE_TYPE_DELETE_FILE_REQUEST:
+		req := &pb.DeleteFileRequest{}
+		if e := proto.Unmarshal(packet.Payload, req); e != nil {
+			s.log.Error("unmarshal delete request failed", zap.Error(err))
+			return
+		}
+		if e := s.DeleteFileHandler(req, conn); e != nil {
+			s.log.Error("handle download file failed", zap.Error(err))
+			return
+		}
+	case pb.MessageType_MESSAGE_TYPE_FILE_INFO_REQUEST:
+		req := &pb.FileInfoRequest{}
+		if e := proto.Unmarshal(packet.Payload, req); e != nil {
+			s.log.Error("unmarshal file info request failed", zap.Error(err))
+			return
+		}
+		if e := s.FileInfoHandler(req, conn); e != nil {
+			s.log.Error("handle info file failed", zap.Error(err))
+			return
+		}
 	}
 
 }

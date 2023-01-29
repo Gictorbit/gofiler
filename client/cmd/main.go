@@ -113,6 +113,60 @@ func main() {
 					return nil
 				},
 			},
+			{
+				Name:  "delete",
+				Usage: "deletes a file on server",
+				Flags: []cli.Flag{
+					&cli.PathFlag{
+						Name:        "code",
+						Usage:       "shared code of uploaded file",
+						Required:    true,
+						Aliases:     []string{"c"},
+						Destination: &ShareCode,
+					},
+				},
+				Action: func(ctx *cli.Context) error {
+					listenAddr := net.JoinHostPort(HostAddress, fmt.Sprintf("%d", PortNumber))
+					log.Println("server address is ", listenAddr)
+					client := tcpclient.NewClient(listenAddr, log.Default())
+					if e := client.Connect(); e != nil {
+						log.Fatal(e)
+					}
+					if err := client.DeleteFile(ShareCode); err != nil {
+						log.Println("failed to delete file", err)
+						return err
+					}
+					client.Stop()
+					return nil
+				},
+			},
+			{
+				Name:  "info",
+				Usage: "fetches information about a file from server",
+				Flags: []cli.Flag{
+					&cli.PathFlag{
+						Name:        "code",
+						Usage:       "shared code of uploaded file",
+						Required:    true,
+						Aliases:     []string{"c"},
+						Destination: &ShareCode,
+					},
+				},
+				Action: func(ctx *cli.Context) error {
+					listenAddr := net.JoinHostPort(HostAddress, fmt.Sprintf("%d", PortNumber))
+					log.Println("server address is ", listenAddr)
+					client := tcpclient.NewClient(listenAddr, log.Default())
+					if e := client.Connect(); e != nil {
+						log.Fatal(e)
+					}
+					if err := client.FileInfo(ShareCode); err != nil {
+						log.Println("failed to get file info", err)
+						return err
+					}
+					client.Stop()
+					return nil
+				},
+			},
 		},
 	}
 	if e := app.Run(os.Args); e != nil {
