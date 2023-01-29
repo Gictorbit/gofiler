@@ -36,18 +36,29 @@ func (c *Client) UploadFile(fPath string) error {
 		}
 		return ErrServerNotReady
 	}
-	//file to read
 
+	//file to read
 	file, err := os.Open(strings.TrimSpace(fPath)) // For read access.
 	if err != nil {
 		c.log.Println("failed to open file")
 		return err
 	}
 	defer file.Close()
+
 	c.log.Println("uploading file...")
-	if _, e := io.Copy(c.conn, file); e != nil {
-		return e
+	io.CopyN(c.conn, file, reqFile.Size)
+
+	fmt.Println("file sent....")
+	resultMsg, err := utils.ReadMessageFromConn(c.conn, &pb.UploadFileResponse{})
+	if err != nil {
+		return err
 	}
+	if resultMsg.Message.ResponseCode == pb.UploadFileResponseCode_UPLOAD_FILE_RESPONSE_CODE_SUCCESS {
+		c.log.Println("file uploaded successfully")
+	} else {
+		c.log.Println("upload file failed")
+	}
+	fmt.Println("File ID Code is: ", resultMsg.Message.GetIdCode())
 	return nil
 }
 

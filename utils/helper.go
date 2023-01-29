@@ -40,7 +40,6 @@ func FileInfo(fPath string) (*pb.File, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("%s MD5 checksum is %x \n", file.Name(), hash.Sum(nil))
 	return &pb.File{
 		Name:      file.Name(),
 		Size:      fileStat.Size(),
