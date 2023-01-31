@@ -10,20 +10,20 @@ import (
 
 // DeleteFileHandler handles delete file request and removes a file
 func (s *Server) DeleteFileHandler(req *pb.DeleteFileRequest, conn net.Conn) error {
-	fileInfo, err := s.fileStorage.FileInfo(req.GetIdCode())
+	fileInfo, err := s.fileStorage.FileInfo(req.GetShareCode())
 	response := &pb.DeleteFileResponse{
 		File:         fileInfo,
 		ResponseCode: pb.ResponseCode_RESPONSE_CODE_OK,
 	}
 	if err != nil {
 		if errors.Is(err, storage.ErrFileNotFound) {
-			s.log.Warn("file not found", zap.String("IDCode", req.IdCode))
+			s.log.Warn("file not found", zap.String("IDCode", req.GetShareCode()))
 			response.ResponseCode = pb.ResponseCode_RESPONSE_CODE_NOT_FOUND
 			return s.SendResponse(conn, pb.MessageType_MESSAGE_TYPE_DELETE_FILE_RESPONSE, response)
 		}
 		s.log.Error("get file info failed",
 			zap.Error(err),
-			zap.String("IDCode", req.IdCode),
+			zap.String("ShareCode", req.ShareCode),
 		)
 		response.ResponseCode = pb.ResponseCode_RESPONSE_CODE_FAILED
 		if e := s.SendResponse(conn, pb.MessageType_MESSAGE_TYPE_DELETE_FILE_RESPONSE, response); e != nil {
@@ -40,7 +40,7 @@ func (s *Server) DeleteFileHandler(req *pb.DeleteFileRequest, conn net.Conn) err
 			zap.String("FileName", fileInfo.Name),
 			zap.Int64("FileSize", fileInfo.Size),
 			zap.String("Md5Sum", fileInfo.Checksum),
-			zap.String("IDCode", fileInfo.IdCode),
+			zap.String("ShareCode", fileInfo.GetShareCode()),
 		)
 		response.ResponseCode = pb.ResponseCode_RESPONSE_CODE_FAILED
 		return s.SendResponse(conn, pb.MessageType_MESSAGE_TYPE_DELETE_FILE_RESPONSE, response)
@@ -50,7 +50,7 @@ func (s *Server) DeleteFileHandler(req *pb.DeleteFileRequest, conn net.Conn) err
 		zap.String("FileName", fileInfo.Name),
 		zap.Int64("FileSize", fileInfo.Size),
 		zap.String("Md5Sum", fileInfo.Checksum),
-		zap.String("IDCode", fileInfo.IdCode),
+		zap.String("ShareCode", fileInfo.ShareCode),
 	)
 	response.ResponseCode = pb.ResponseCode_RESPONSE_CODE_SUCCESS
 	return s.SendResponse(conn, pb.MessageType_MESSAGE_TYPE_DELETE_FILE_RESPONSE, response)

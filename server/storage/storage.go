@@ -40,7 +40,7 @@ func NewStorage(boxPath string, codeLength int) Storage {
 
 // SaveFile reads file from connection and saves file to os fs
 func (fs *FileStorage) SaveFile(file *pb.File, conn net.Conn) error {
-	newFileName := fmt.Sprintf("%s_%s", file.IdCode, file.Name)
+	newFileName := fmt.Sprintf("%s_%s", file.ShareCode, file.Name)
 	fPath := path.Join(fs.FileBoxPath, strings.TrimSpace(newFileName))
 	f, err := os.Create(fPath)
 	if err != nil {
@@ -72,7 +72,7 @@ func (fs *FileStorage) SaveFile(file *pb.File, conn net.Conn) error {
 
 // GetFile loads file using share code and writes file to tcp conn
 func (fs *FileStorage) GetFile(conn net.Conn, fileInfo *pb.File) error {
-	realName := fileInfo.GetIdCode() + "_" + fileInfo.Name
+	realName := fileInfo.GetShareCode() + "_" + fileInfo.Name
 	fPath := filepath.Join(fs.FileBoxPath, realName)
 	openedFile, err := os.Open(strings.TrimSpace(fPath)) // For read access.
 	if err != nil {
@@ -91,7 +91,7 @@ func (fs *FileStorage) GetFile(conn net.Conn, fileInfo *pb.File) error {
 
 // DeleteFile loads file using share code and deletes file
 func (fs *FileStorage) DeleteFile(fileInfo *pb.File) error {
-	realName := fileInfo.GetIdCode() + "_" + fileInfo.Name
+	realName := fileInfo.GetShareCode() + "_" + fileInfo.Name
 	fPath := filepath.Join(fs.FileBoxPath, realName)
 	if err := os.Remove(strings.TrimSpace(fPath)); err != nil {
 		return err
@@ -124,6 +124,6 @@ func (fs *FileStorage) FileInfo(code string) (*pb.File, error) {
 		return nil, ErrInvalidName
 	}
 	fileInfo.Name = splitName[1]
-	fileInfo.IdCode = splitName[0]
+	fileInfo.ShareCode = splitName[0]
 	return fileInfo, nil
 }

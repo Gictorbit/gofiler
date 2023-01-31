@@ -9,7 +9,7 @@ import (
 // FileInfo fetches file info from server using share code
 func (c *Client) FileInfo(shareCode string) error {
 	request := &pb.FileInfoRequest{
-		IdCode: shareCode,
+		ShareCode: shareCode,
 	}
 	if e := c.SendRequest(pb.MessageType_MESSAGE_TYPE_FILE_INFO_REQUEST, request); e != nil {
 		return fmt.Errorf("sending file info request failed: %v", e)

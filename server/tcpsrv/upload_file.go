@@ -9,9 +9,9 @@ import (
 
 // UploadFileHandler handles upload file request and receives a file from client
 func (s *Server) UploadFileHandler(req *pb.UploadFileRequest, conn net.Conn) error {
-	req.File.IdCode = utils.GenerateRandomCode(10)
+	req.File.ShareCode = utils.GenerateRandomCode(10)
 	resultResp := &pb.UploadFileResponse{
-		IdCode:       req.File.IdCode,
+		ShareCode:    req.File.GetShareCode(),
 		ResponseCode: pb.ResponseCode_RESPONSE_CODE_SUCCESS,
 	}
 	readyResponse := &pb.UploadFileResponse{
@@ -26,7 +26,7 @@ func (s *Server) UploadFileHandler(req *pb.UploadFileRequest, conn net.Conn) err
 			zap.String("FileName", req.GetFile().Name),
 			zap.Int64("FileSize", req.GetFile().Size),
 			zap.String("Md5Sum", req.GetFile().Checksum),
-			zap.String("IDCode", req.GetFile().IdCode),
+			zap.String("ShareCode", req.GetFile().ShareCode),
 		)
 		resultResp.ResponseCode = pb.ResponseCode_RESPONSE_CODE_FAILED
 		return s.SendResponse(conn, pb.MessageType_MESSAGE_TYPE_UPLOAD_FILE_RESPONSE, resultResp)
@@ -35,7 +35,7 @@ func (s *Server) UploadFileHandler(req *pb.UploadFileRequest, conn net.Conn) err
 		zap.String("FileName", req.GetFile().Name),
 		zap.Int64("FileSize", req.GetFile().Size),
 		zap.String("Md5Sum", req.GetFile().Checksum),
-		zap.String("IDCode", req.GetFile().IdCode),
+		zap.String("ShareCode", req.GetFile().ShareCode),
 	)
 	return s.SendResponse(conn, pb.MessageType_MESSAGE_TYPE_UPLOAD_FILE_RESPONSE, resultResp)
 }

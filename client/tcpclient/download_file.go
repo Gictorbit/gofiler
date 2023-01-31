@@ -14,7 +14,7 @@ import (
 // DownloadFile downloads a file from server by its share code
 func (c *Client) DownloadFile(outPath, shareCode string) error {
 	request := &pb.DownLoadFileRequest{
-		IdCode: shareCode,
+		ShareCode: shareCode,
 	}
 	if e := c.SendRequest(pb.MessageType_MESSAGE_TYPE_DOWNLOAD_FILE_REQUEST, request); e != nil {
 		return fmt.Errorf("sending download request failed: %v", e)

@@ -5,7 +5,7 @@ package proto;
 option go_package = ".;pb";
 
 message File {
-  string id_code = 1;
+  string share_code = 1;
   string name = 2;
   int64 size = 3; //in bytes
   string extension = 4;
@@ -41,12 +41,12 @@ message UploadFileRequest {
 }
 
 message UploadFileResponse {
-  string id_code = 1;
+  string share_code = 1;
   ResponseCode response_code = 2;
 }
 
 message DownLoadFileRequest {
-  string id_code = 1;
+  string share_code = 1;
 }
 
 message DownLoadFileResponse {
@@ -55,7 +55,7 @@ message DownLoadFileResponse {
 }
 
 message DeleteFileRequest {
-  string id_code = 1;
+  string share_code = 1;
 }
 
 message DeleteFileResponse {
@@ -64,7 +64,7 @@ message DeleteFileResponse {
 }
 
 message FileInfoRequest {
-  string id_code = 1;
+  string share_code = 1;
 }
 
 message FileInfoResponse {

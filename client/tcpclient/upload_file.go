@@ -62,7 +62,7 @@ func (c *Client) UploadFile(fPath string) error {
 	} else {
 		c.log.Println("upload file failed")
 	}
-	c.PrintCode(resultMsg.Message.GetIdCode())
+	c.PrintCode(resultMsg.Message.GetShareCode())
 	return nil
 }
 

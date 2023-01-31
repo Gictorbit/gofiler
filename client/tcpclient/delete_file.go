@@ -9,7 +9,7 @@ import (
 // DeleteFile removes a file from server
 func (c *Client) DeleteFile(shareCode string) error {
 	request := &pb.DeleteFileRequest{
-		IdCode: shareCode,
+		ShareCode: shareCode,
 	}
 	if e := c.SendRequest(pb.MessageType_MESSAGE_TYPE_DELETE_FILE_REQUEST, request); e != nil {
 		return fmt.Errorf("sending delete file request failed: %v", e)
