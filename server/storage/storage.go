@@ -47,7 +47,7 @@ func (fs *FileStorage) SaveFile(file *pb.File, conn net.Conn) error {
 	if receivedBytes != file.Size {
 		return fmt.Errorf("recived byte size not equal to file size")
 	}
-	fileInfo, err := utils.FileInfo(fPath, f)
+	fileInfo, err := utils.FileInfo(fPath)
 	if err != nil {
 		return fmt.Errorf("get file info error:%v", err)
 	}

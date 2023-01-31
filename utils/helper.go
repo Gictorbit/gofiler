@@ -11,6 +11,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 const (
@@ -22,19 +23,24 @@ var (
 	ErrInvalidPacketSize = errors.New("invalid packet size")
 )
 
-func FileInfo(fPath string, file *os.File) (*pb.File, error) {
+func FileInfo(fPath string) (*pb.File, error) {
+	openedFile, err := os.Open(strings.TrimSpace(fPath)) // For read access.
+	if err != nil {
+		return nil, err
+	}
+	defer openedFile.Close()
 	fileExtension := filepath.Ext(fPath)
 	fileStat, err := os.Stat(fPath)
 	if err != nil {
 		return nil, err
 	}
 	hash := md5.New()
-	_, err = io.Copy(hash, file)
+	_, err = io.Copy(hash, openedFile)
 	if err != nil {
 		return nil, err
 	}
 	return &pb.File{
-		Name:      file.Name(),
+		Name:      openedFile.Name(),
 		Size:      fileStat.Size(),
 		Extension: fileExtension,
 		Checksum:  fmt.Sprintf("%x", hash.Sum(nil)),

@@ -17,13 +17,13 @@ var (
 
 func (c *Client) UploadFile(fPath string) error {
 	//file to read
-	file, err := os.Open(strings.TrimSpace(fPath)) // For read access.
+	openedFile, err := os.Open(strings.TrimSpace(fPath)) // For read access.
 	if err != nil {
 		c.log.Println("failed to open file")
 		return err
 	}
-	defer file.Close()
-	reqFile, err := utils.FileInfo(fPath, file)
+	defer openedFile.Close()
+	reqFile, err := utils.FileInfo(fPath)
 	if err != nil {
 		return err
 	}
@@ -42,7 +42,7 @@ func (c *Client) UploadFile(fPath string) error {
 	}
 
 	c.log.Println("uploading file...")
-	sentBytes, e := io.CopyN(c.conn, file, reqFile.Size)
+	sentBytes, e := io.CopyN(c.conn, openedFile, reqFile.Size)
 	if e != nil && !errors.Is(e, io.EOF) {
 		c.log.Println("io copy error:", e)
 		return e
