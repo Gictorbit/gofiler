@@ -22,6 +22,8 @@ type Server struct {
 }
 
 type ServerInterface interface {
+	Start()
+	Stop()
 	UploadFileHandler(req *pb.UploadFileRequest, conn net.Conn) error
 	DownloadFileHandler(req *pb.DownLoadFileRequest, conn net.Conn) error
 	DeleteFileHandler(req *pb.DeleteFileRequest, conn net.Conn) error
@@ -32,7 +34,7 @@ var (
 	_ ServerInterface = &Server{}
 )
 
-func NewServer(listenAddr string, logger *zap.Logger, fileStore storage.Storage) *Server {
+func NewServer(listenAddr string, logger *zap.Logger, fileStore storage.Storage) ServerInterface {
 	return &Server{
 		listenAddr:  listenAddr,
 		quitChan:    make(chan Empty),

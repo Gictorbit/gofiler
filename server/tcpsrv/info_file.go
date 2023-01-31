@@ -8,7 +8,7 @@ import (
 	"net"
 )
 
-// FileInfoHandler returns file info from given code
+// FileInfoHandler handles file info request returns all information about given file share code
 func (s *Server) FileInfoHandler(req *pb.FileInfoRequest, conn net.Conn) error {
 	fileInfo, err := s.fileStorage.FileInfo(req.GetIdCode())
 	response := &pb.FileInfoResponse{

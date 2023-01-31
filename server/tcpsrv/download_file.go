@@ -8,6 +8,7 @@ import (
 	"net"
 )
 
+// DownloadFileHandler handles download file request and sends a file to client
 func (s *Server) DownloadFileHandler(req *pb.DownLoadFileRequest, conn net.Conn) error {
 	fileInfo, err := s.fileStorage.FileInfo(req.GetIdCode())
 	response := &pb.DownLoadFileResponse{

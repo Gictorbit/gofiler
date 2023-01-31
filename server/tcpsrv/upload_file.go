@@ -7,6 +7,7 @@ import (
 	"net"
 )
 
+// UploadFileHandler handles upload file request and receives a file from client
 func (s *Server) UploadFileHandler(req *pb.UploadFileRequest, conn net.Conn) error {
 	req.File.IdCode = utils.GenerateRandomCode(10)
 	resultResp := &pb.UploadFileResponse{

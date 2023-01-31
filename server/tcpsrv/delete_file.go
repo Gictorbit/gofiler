@@ -8,6 +8,7 @@ import (
 	"net"
 )
 
+// DeleteFileHandler handles delete file request and removes a file
 func (s *Server) DeleteFileHandler(req *pb.DeleteFileRequest, conn net.Conn) error {
 	fileInfo, err := s.fileStorage.FileInfo(req.GetIdCode())
 	response := &pb.DeleteFileResponse{
