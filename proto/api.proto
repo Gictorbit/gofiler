@@ -11,6 +11,7 @@ message File {
   string extension = 4;
   string checksum = 5;
 }
+
 enum MessageType {
   MESSAGE_TYPE_UNKNOWN = 0;
 
@@ -27,19 +28,21 @@ enum MessageType {
   MESSAGE_TYPE_DELETE_FILE_RESPONSE = 8;
 }
 
+enum ResponseCode {
+  RESPONSE_CODE_NOT_FOUND = 0;
+  RESPONSE_CODE_OK = 1;
+  RESPONSE_CODE_READY = 2;
+  RESPONSE_CODE_SUCCESS = 3;
+  RESPONSE_CODE_FAILED = 4;
+}
+
 message UploadFileRequest {
   File file = 1;
 }
 
 message UploadFileResponse {
   string id_code = 1;
-  UploadFileResponseCode response_code = 2;
-}
-
-enum UploadFileResponseCode {
-  UPLOAD_FILE_RESPONSE_CODE_READY = 0;
-  UPLOAD_FILE_RESPONSE_CODE_SUCCESS = 1;
-  UPLOAD_FILE_RESPONSE_CODE_FAILED = 2;
+  ResponseCode response_code = 2;
 }
 
 message DownLoadFileRequest {
@@ -48,11 +51,7 @@ message DownLoadFileRequest {
 
 message DownLoadFileResponse {
   File file = 1;
-}
-
-enum DownLoadFileResponseCode {
-  DOWNLOAD_FILE_RESPONSE_CODE_NOT_FOUND = 0;
-  DOWNLOAD_FILE_RESPONSE_CODE_OK = 1;
+  ResponseCode response_code = 2;
 }
 
 message DeleteFileRequest {
@@ -61,12 +60,7 @@ message DeleteFileRequest {
 
 message DeleteFileResponse {
   File file = 1;
-  DeleteFileResponse response_code = 2;
-}
-
-enum DeleteFileResponseCode {
-  DELETE_FILE_RESPONSE_CODE_NOT_FOUND = 0;
-  DELETE_FILE_RESPONSE_CODE_OK = 1;
+  ResponseCode response_code = 2;
 }
 
 message FileInfoRequest {
@@ -75,4 +69,5 @@ message FileInfoRequest {
 
 message FileInfoResponse {
   File file_info = 1;
+  ResponseCode response_code = 2;
 }
