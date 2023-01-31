@@ -13,13 +13,12 @@ func (s *Server) UploadFileHandler(req *pb.UploadFileRequest, conn net.Conn) err
 		IdCode:       req.File.IdCode,
 		ResponseCode: pb.ResponseCode_RESPONSE_CODE_SUCCESS,
 	}
-
-	go func() {
-		readyResponse := &pb.UploadFileResponse{
-			ResponseCode: pb.ResponseCode_RESPONSE_CODE_READY,
-		}
-		_ = s.SendResponse(conn, pb.MessageType_MESSAGE_TYPE_UPLOAD_FILE_RESPONSE, readyResponse)
-	}()
+	readyResponse := &pb.UploadFileResponse{
+		ResponseCode: pb.ResponseCode_RESPONSE_CODE_READY,
+	}
+	if e := s.SendResponse(conn, pb.MessageType_MESSAGE_TYPE_UPLOAD_FILE_RESPONSE, readyResponse); e != nil {
+		return e
+	}
 	if err := s.fileStorage.SaveFile(req.File, conn); err != nil {
 		s.log.Error("error saving File",
 			zap.Error(err),
