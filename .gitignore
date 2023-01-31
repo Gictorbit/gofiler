@@ -4,6 +4,8 @@
 .vscode/*
 build
 build/*
+download
+download/*
 bin
 bin/*
 filebox
