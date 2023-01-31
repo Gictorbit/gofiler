@@ -8,7 +8,7 @@ import (
 	"net"
 )
 
-func (s *Server) DeleteFileHandler(req *pb.DeleteFileRequest, conn net.Conn) (err error) {
+func (s *Server) DeleteFileHandler(req *pb.DeleteFileRequest, conn net.Conn) error {
 	fileInfo, err := s.fileStorage.FileInfo(req.GetIdCode())
 	response := &pb.DeleteFileResponse{
 		File:         fileInfo,
@@ -44,7 +44,7 @@ func (s *Server) DeleteFileHandler(req *pb.DeleteFileRequest, conn net.Conn) (er
 		response.ResponseCode = pb.ResponseCode_RESPONSE_CODE_FAILED
 		return s.SendResponse(conn, pb.MessageType_MESSAGE_TYPE_DELETE_FILE_RESPONSE, response)
 	}
-	s.log.Info("sent file successfully",
+	s.log.Info("file deleted successfully",
 		zap.Error(err),
 		zap.String("FileName", fileInfo.Name),
 		zap.Int64("FileSize", fileInfo.Size),

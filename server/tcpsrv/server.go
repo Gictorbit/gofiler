@@ -21,6 +21,17 @@ type Server struct {
 	log         *zap.Logger
 }
 
+type ServerInterface interface {
+	UploadFileHandler(req *pb.UploadFileRequest, conn net.Conn) error
+	DownloadFileHandler(req *pb.DownLoadFileRequest, conn net.Conn) error
+	DeleteFileHandler(req *pb.DeleteFileRequest, conn net.Conn) error
+	FileInfoHandler(req *pb.FileInfoRequest, conn net.Conn) error
+}
+
+var (
+	_ ServerInterface = &Server{}
+)
+
 func NewServer(listenAddr string, logger *zap.Logger, fileStore storage.Storage) *Server {
 	return &Server{
 		listenAddr:  listenAddr,

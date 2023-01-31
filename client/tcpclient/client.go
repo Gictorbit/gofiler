@@ -14,6 +14,16 @@ type Client struct {
 	wg         sync.WaitGroup
 	log        *log.Logger
 }
+type ClientInterface interface {
+	UploadFile(fPath string) error
+	DownloadFile(outPath, shareCode string) error
+	DeleteFile(shareCode string) error
+	FileInfo(shareCode string) error
+}
+
+var (
+	_ ClientInterface = &Client{}
+)
 
 func NewClient(listenAddr string, logger *log.Logger) *Client {
 	return &Client{

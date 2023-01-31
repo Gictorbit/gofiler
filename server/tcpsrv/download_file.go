@@ -8,7 +8,7 @@ import (
 	"net"
 )
 
-func (s *Server) DownloadFileHandler(req *pb.DownLoadFileRequest, conn net.Conn) (err error) {
+func (s *Server) DownloadFileHandler(req *pb.DownLoadFileRequest, conn net.Conn) error {
 	fileInfo, err := s.fileStorage.FileInfo(req.GetIdCode())
 	response := &pb.DownLoadFileResponse{
 		File:         fileInfo,
