@@ -14,28 +14,20 @@ import (
 )
 
 const (
-	RandomCodeLength     = 10
-	PacketMaxByteLength  = 2048
-	ServerSocketType     = "tcp"
-	RandomPasswordLength = 15
+	PacketMaxByteLength = 2048
+	ServerSocketType    = "tcp"
 )
 
 var (
 	ErrInvalidPacketSize = errors.New("invalid packet size")
 )
 
-func FileInfo(fPath string) (*pb.File, error) {
+func FileInfo(fPath string, file *os.File) (*pb.File, error) {
 	fileExtension := filepath.Ext(fPath)
 	fileStat, err := os.Stat(fPath)
 	if err != nil {
 		return nil, err
 	}
-	file, err := os.Open(fPath)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
 	hash := md5.New()
 	_, err = io.Copy(hash, file)
 	if err != nil {
@@ -47,14 +39,6 @@ func FileInfo(fPath string) (*pb.File, error) {
 		Extension: fileExtension,
 		Checksum:  fmt.Sprintf("%x", hash.Sum(nil)),
 	}, nil
-}
-
-func GenerateRandomCode() string {
-	b := make([]byte, RandomCodeLength)
-	if _, err := rand.Read(b); err != nil {
-		panic(err)
-	}
-	return fmt.Sprintf("%X", b)
 }
 
 type MessageBody[T proto.Message] struct {
@@ -81,8 +65,8 @@ func ReadMessageFromConn[T proto.Message](conn net.Conn, message T) (*MessageBod
 	return packet, nil
 }
 
-func GenerateRandomPassword() string {
-	b := make([]byte, RandomPasswordLength)
+func GenerateRandomCode(codeLength int) string {
+	b := make([]byte, codeLength)
 	if _, err := rand.Read(b); err != nil {
 		panic(err)
 	}

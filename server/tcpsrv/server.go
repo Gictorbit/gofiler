@@ -2,6 +2,7 @@ package tcpsrv
 
 import (
 	"github.com/Gictorbit/gofiler/proto/pb"
+	"github.com/Gictorbit/gofiler/server/storage"
 	"github.com/Gictorbit/gofiler/utils"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
@@ -12,21 +13,21 @@ import (
 type Empty struct{}
 
 type Server struct {
-	listenAddr string
-	storage    string
-	ln         net.Listener
-	quitChan   chan Empty
-	wg         sync.WaitGroup
-	log        *zap.Logger
+	listenAddr  string
+	fileStorage storage.Storage
+	ln          net.Listener
+	quitChan    chan Empty
+	wg          sync.WaitGroup
+	log         *zap.Logger
 }
 
-func NewServer(listenAddr string, logger *zap.Logger, storagePath string) *Server {
+func NewServer(listenAddr string, logger *zap.Logger, fileStore storage.Storage) *Server {
 	return &Server{
-		listenAddr: listenAddr,
-		quitChan:   make(chan Empty),
-		wg:         sync.WaitGroup{},
-		log:        logger,
-		storage:    storagePath,
+		listenAddr:  listenAddr,
+		quitChan:    make(chan Empty),
+		wg:          sync.WaitGroup{},
+		log:         logger,
+		fileStorage: fileStore,
 	}
 }
 
@@ -42,7 +43,6 @@ func (s *Server) Start() {
 	go s.acceptConnections()
 	s.log.Info("server started",
 		zap.String("ListenAddress", s.listenAddr),
-		zap.String("storagePath", s.storage),
 	)
 	<-s.quitChan
 }
@@ -55,12 +55,14 @@ func (s *Server) acceptConnections() {
 			continue
 		}
 		s.log.Info("new Connection to the server", zap.String("Address", conn.RemoteAddr().String()))
+		s.wg.Add(1)
 		go s.HandleConnection(conn)
 	}
 }
 
 func (s *Server) HandleConnection(conn net.Conn) {
 	defer conn.Close()
+	defer s.wg.Done()
 	packet, err := s.ReadPacket(conn)
 	if err != nil {
 		s.log.Error("read packet error", zap.Error(err))
@@ -108,7 +110,6 @@ func (s *Server) HandleConnection(conn net.Conn) {
 			return
 		}
 	}
-
 }
 
 func (s *Server) Stop() {

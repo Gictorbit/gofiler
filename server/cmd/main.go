@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/Gictorbit/gofiler/server/storage"
 	"github.com/Gictorbit/gofiler/server/tcpsrv"
-	"github.com/Gictorbit/gofiler/utils"
 	"github.com/urfave/cli/v2"
 	"go.uber.org/zap"
 	"log"
@@ -15,15 +15,13 @@ import (
 )
 
 var (
-	HostAddress   string
-	PortNumber    uint
-	StoragePath   string
-	AdminPassword string
+	HostAddress string
+	PortNumber  uint
+	StoragePath string
 )
 
 func main() {
 	logger, err := zap.NewProduction()
-	adminPassword := utils.GenerateRandomPassword()
 	if err != nil {
 		log.Fatalf("create new logger failed:%v\n", err)
 	}
@@ -31,7 +29,7 @@ func main() {
 	if err != nil {
 		logger.Error("get pwd failed", zap.Error(err))
 	}
-	defaultStoragePath := filepath.Join(pwdPath, "storage")
+	defaultStoragePath := filepath.Join(pwdPath, "filebox")
 
 	app := &cli.App{
 		Name:  "server",
@@ -66,15 +64,6 @@ func main() {
 						Destination: &StoragePath,
 						EnvVars:     []string{"STORAGE_PATH"},
 					},
-					&cli.StringFlag{
-						Name:        "password",
-						Usage:       "set admin password",
-						Value:       adminPassword,
-						DefaultText: "a random password",
-						Aliases:     []string{"pass"},
-						Destination: &AdminPassword,
-						EnvVars:     []string{"ADMIN_PASSWORD"},
-					},
 				},
 				Action: func(ctx *cli.Context) error {
 					listenAddr := net.JoinHostPort(HostAddress, fmt.Sprintf("%d", PortNumber))
@@ -82,10 +71,10 @@ func main() {
 						if mkdirErr := os.MkdirAll(StoragePath, os.ModePerm); mkdirErr != nil {
 							return mkdirErr
 						}
-						logger.Info("storage directory created", zap.String("Path", StoragePath))
 					}
-					server := tcpsrv.NewServer(listenAddr, logger, StoragePath)
-					logger.Info("admin password generated", zap.String("password", AdminPassword))
+					logger.Info("storage directory is", zap.String("Path", StoragePath))
+					fileStorage := storage.NewStorage(StoragePath, 10)
+					server := tcpsrv.NewServer(listenAddr, logger, fileStorage)
 					go server.Start()
 
 					sigs := make(chan os.Signal, 1)

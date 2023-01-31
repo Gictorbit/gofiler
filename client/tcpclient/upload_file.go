@@ -16,28 +16,6 @@ var (
 )
 
 func (c *Client) UploadFile(fPath string) error {
-	reqFile, err := utils.FileInfo(fPath)
-	if err != nil {
-		return err
-	}
-	c.PrintFileInfo(reqFile)
-	uploadFileRequest := &pb.UploadFileRequest{File: reqFile}
-	if e := c.SendRequest(pb.MessageType_MESSAGE_TYPE_UPLOAD_FILE_REQUEST, uploadFileRequest); e != nil {
-		return e
-	}
-
-	readyMsg, err := utils.ReadMessageFromConn(c.conn, &pb.UploadFileResponse{})
-	if err != nil {
-		return err
-	}
-	if readyMsg.Message.ResponseCode != pb.UploadFileResponseCode_UPLOAD_FILE_RESPONSE_CODE_READY {
-		if readyMsg.Message.ResponseCode == pb.UploadFileResponseCode_UPLOAD_FILE_RESPONSE_CODE_EXISTS {
-			c.log.Println("file is already exists on server")
-			return nil
-		}
-		return ErrServerNotReady
-	}
-
 	//file to read
 	file, err := os.Open(strings.TrimSpace(fPath)) // For read access.
 	if err != nil {
@@ -45,16 +23,40 @@ func (c *Client) UploadFile(fPath string) error {
 		return err
 	}
 	defer file.Close()
+	reqFile, err := utils.FileInfo(fPath, file)
+	if err != nil {
+		return err
+	}
+	c.PrintFileInfo(reqFile)
+
+	if e := c.SendRequest(pb.MessageType_MESSAGE_TYPE_UPLOAD_FILE_REQUEST, &pb.UploadFileRequest{File: reqFile}); e != nil {
+		return e
+	}
+
+	readyMsg, err := utils.ReadMessageFromConn(c.conn, &pb.UploadFileResponse{})
+	if err != nil {
+		return err
+	}
+	if readyMsg.Message.ResponseCode != pb.ResponseCode_RESPONSE_CODE_READY {
+		return ErrServerNotReady
+	}
 
 	c.log.Println("uploading file...")
-	io.CopyN(c.conn, file, reqFile.Size)
-
+	sentBytes, e := io.CopyN(c.conn, file, reqFile.Size)
+	if e != nil && !errors.Is(e, io.EOF) {
+		c.log.Println("io copy error:", e)
+		return e
+	}
+	c.log.Println("sent bytes:", sentBytes)
+	if sentBytes != reqFile.Size {
+		return fmt.Errorf("sent bytes not equal to file size")
+	}
 	c.log.Println("file sent....")
 	resultMsg, err := utils.ReadMessageFromConn(c.conn, &pb.UploadFileResponse{})
 	if err != nil {
 		return err
 	}
-	if resultMsg.Message.ResponseCode == pb.UploadFileResponseCode_UPLOAD_FILE_RESPONSE_CODE_SUCCESS {
+	if resultMsg.Message.ResponseCode == pb.ResponseCode_RESPONSE_CODE_SUCCESS {
 		c.log.Println("file uploaded successfully")
 	} else {
 		c.log.Println("upload file failed")
