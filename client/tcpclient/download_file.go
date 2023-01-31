@@ -11,6 +11,7 @@ import (
 	"strings"
 )
 
+// DownloadFile downloads a file from server by its share code
 func (c *Client) DownloadFile(outPath, shareCode string) error {
 	request := &pb.DownLoadFileRequest{
 		IdCode: shareCode,

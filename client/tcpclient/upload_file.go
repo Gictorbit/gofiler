@@ -15,6 +15,7 @@ var (
 	ErrServerNotReady = errors.New("server is not ready to receive file")
 )
 
+// UploadFile uploads a file to server and prints share code
 func (c *Client) UploadFile(fPath string) error {
 	//file to read
 	openedFile, err := os.Open(strings.TrimSpace(fPath)) // For read access.

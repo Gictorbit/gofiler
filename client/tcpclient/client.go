@@ -15,6 +15,8 @@ type Client struct {
 	log        *log.Logger
 }
 type ClientInterface interface {
+	Connect() error
+	Stop()
 	UploadFile(fPath string) error
 	DownloadFile(outPath, shareCode string) error
 	DeleteFile(shareCode string) error
@@ -25,7 +27,7 @@ var (
 	_ ClientInterface = &Client{}
 )
 
-func NewClient(listenAddr string, logger *log.Logger) *Client {
+func NewClient(listenAddr string, logger *log.Logger) ClientInterface {
 	return &Client{
 		listenAddr: listenAddr,
 		wg:         sync.WaitGroup{},

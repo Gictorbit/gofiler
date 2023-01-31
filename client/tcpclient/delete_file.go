@@ -6,6 +6,7 @@ import (
 	"github.com/Gictorbit/gofiler/utils"
 )
 
+// DeleteFile removes a file from server
 func (c *Client) DeleteFile(shareCode string) error {
 	request := &pb.DeleteFileRequest{
 		IdCode: shareCode,
