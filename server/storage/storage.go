@@ -17,6 +17,7 @@ type Storage interface {
 	SaveFile(file *pb.File, conn net.Conn) error
 	FileInfo(code string) (*pb.File, error)
 	GetFile(conn net.Conn, fileInfo *pb.File) error
+	DeleteFile(fileInfo *pb.File) error
 }
 
 type FileStorage struct {
@@ -84,6 +85,16 @@ func (fs *FileStorage) GetFile(conn net.Conn, fileInfo *pb.File) error {
 	}
 	if sentBytes != fileInfo.Size {
 		return fmt.Errorf("sent bytes not equal to file size")
+	}
+	return nil
+}
+
+// DeleteFile loads file using share code and deletes file
+func (fs *FileStorage) DeleteFile(fileInfo *pb.File) error {
+	realName := fileInfo.GetIdCode() + "_" + fileInfo.Name
+	fPath := filepath.Join(fs.FileBoxPath, realName)
+	if err := os.Remove(strings.TrimSpace(fPath)); err != nil {
+		return err
 	}
 	return nil
 }
