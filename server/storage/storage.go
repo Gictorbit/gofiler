@@ -9,11 +9,13 @@ import (
 	"net"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 )
 
 type Storage interface {
 	SaveFile(file *pb.File, conn net.Conn) error
+	FileInfo(code string) (*pb.File, error)
 }
 
 type FileStorage struct {
@@ -23,6 +25,8 @@ type FileStorage struct {
 
 var (
 	ErrWrongChecksum = errors.New("wrong md5 checksum")
+	ErrFileNotFound  = errors.New("file not found")
+	ErrInvalidName   = errors.New("file name is invalid")
 )
 
 func NewStorage(boxPath string, codeLength int) Storage {
@@ -32,6 +36,7 @@ func NewStorage(boxPath string, codeLength int) Storage {
 	}
 }
 
+// SaveFile reads file from connection and saves file to os fs
 func (fs *FileStorage) SaveFile(file *pb.File, conn net.Conn) error {
 	newFileName := fmt.Sprintf("%s_%s", file.IdCode, file.Name)
 	fPath := path.Join(fs.FileBoxPath, strings.TrimSpace(newFileName))
@@ -61,4 +66,33 @@ func (fs *FileStorage) SaveFile(file *pb.File, conn net.Conn) error {
 		return ErrWrongChecksum
 	}
 	return nil
+}
+
+// FileInfo returns
+func (fs *FileStorage) FileInfo(code string) (*pb.File, error) {
+	var realFileName string
+	e := filepath.Walk(fs.FileBoxPath, func(path string, info os.FileInfo, err error) error {
+		if err == nil && strings.Contains(info.Name(), code) {
+			realFileName = info.Name()
+		}
+		return nil
+	})
+	if e != nil {
+		return nil, e
+	}
+	if realFileName == "" {
+		return nil, ErrFileNotFound
+	}
+	fPath := filepath.Join(fs.FileBoxPath, realFileName)
+	fileInfo, err := utils.FileInfo(fPath)
+	if err != nil {
+		return nil, err
+	}
+	splitName := strings.Split(realFileName, "_")
+	if len(splitName) < 2 || splitName[0] != code {
+		return nil, ErrInvalidName
+	}
+	fileInfo.Name = splitName[1]
+	fileInfo.IdCode = splitName[0]
+	return fileInfo, nil
 }
