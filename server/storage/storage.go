@@ -16,6 +16,7 @@ import (
 type Storage interface {
 	SaveFile(file *pb.File, conn net.Conn) error
 	FileInfo(code string) (*pb.File, error)
+	GetFile(conn net.Conn, fileInfo *pb.File) error
 }
 
 type FileStorage struct {
@@ -64,6 +65,25 @@ func (fs *FileStorage) SaveFile(file *pb.File, conn net.Conn) error {
 			return e
 		}
 		return ErrWrongChecksum
+	}
+	return nil
+}
+
+// GetFile loads file using share code and writes file to tcp conn
+func (fs *FileStorage) GetFile(conn net.Conn, fileInfo *pb.File) error {
+	realName := fileInfo.GetIdCode() + "_" + fileInfo.Name
+	fPath := filepath.Join(fs.FileBoxPath, realName)
+	openedFile, err := os.Open(strings.TrimSpace(fPath)) // For read access.
+	if err != nil {
+		return err
+	}
+	defer openedFile.Close()
+	sentBytes, e := io.CopyN(conn, openedFile, fileInfo.Size)
+	if e != nil && !errors.Is(e, io.EOF) {
+		return e
+	}
+	if sentBytes != fileInfo.Size {
+		return fmt.Errorf("sent bytes not equal to file size")
 	}
 	return nil
 }
