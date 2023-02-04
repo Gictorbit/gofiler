@@ -3,7 +3,6 @@ module github.com/Gictorbit/gofiler
 go 1.19
 
 require (
-	github.com/barasher/go-exiftool v1.8.0
 	github.com/jedib0t/go-pretty/v6 v6.4.4
 	github.com/urfave/cli/v2 v2.24.1
 	go.uber.org/zap v1.24.0
