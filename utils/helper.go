@@ -40,7 +40,7 @@ func FileInfo(fPath string) (*pb.File, error) {
 		return nil, err
 	}
 	return &pb.File{
-		Name:      openedFile.Name(),
+		Name:      filepath.Base(openedFile.Name()),
 		Size:      fileStat.Size(),
 		Extension: fileExtension,
 		Checksum:  fmt.Sprintf("%x", hash.Sum(nil)),
