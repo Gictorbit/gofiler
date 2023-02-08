@@ -21,12 +21,17 @@ type PacketBody struct {
 func (s *Server) ReadPacket(conn net.Conn) (*PacketBody, error) {
 	buf := make([]byte, utils.PacketMaxByteLength)
 	n, err := conn.Read(buf)
-	if err != nil && !errors.Is(err, io.EOF) {
+	if err != nil {
 		return nil, err
 	}
+	if n == 0 {
+		return nil, io.EOF
+	}
+	messageType := pb.MessageType(buf[0])
+	payload := buf[1:n]
 	return &PacketBody{
-		MessageType: pb.MessageType(buf[0]),
-		Payload:     buf[1:n],
+		MessageType: messageType,
+		Payload:     payload,
 	}, nil
 }
 

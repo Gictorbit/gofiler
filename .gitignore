@@ -10,6 +10,7 @@ bin
 bin/*
 filebox
 filebox/*
+*.zip
 # Binaries for programs and plugins
 *.exe
 *.exe~

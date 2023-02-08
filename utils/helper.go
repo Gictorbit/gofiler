@@ -59,9 +59,10 @@ func ReadMessageFromConn[T proto.Message](conn net.Conn, message T) (*MessageBod
 	if err != nil {
 		return nil, err
 	}
+	data := buf[:n]
 	packet := &MessageBody[T]{
-		MessageType: pb.MessageType(buf[0]),
-		Payload:     buf[1:n],
+		MessageType: pb.MessageType(data[0]),
+		Payload:     data[1:],
 	}
 	if e := proto.Unmarshal(packet.Payload, message); e != nil {
 		return nil, e
