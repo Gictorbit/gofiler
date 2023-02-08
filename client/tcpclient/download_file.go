@@ -55,6 +55,8 @@ func (c *Client) DownloadFile(outPath, shareCode string) error {
 	}
 	if resultResp.Message.ResponseCode == pb.ResponseCode_RESPONSE_CODE_SUCCESS {
 		c.log.Println("file downloaded successfully", fPath)
+	} else {
+		return fmt.Errorf("download file failed")
 	}
 	fileInfo, err := utils.FileInfo(fPath)
 	if err != nil {
