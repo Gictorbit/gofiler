@@ -37,6 +37,8 @@ func (c *Client) DeleteFile(shareCode string) error {
 	}
 	if resultResp.Message.ResponseCode == pb.ResponseCode_RESPONSE_CODE_SUCCESS {
 		c.log.Println("file removed successfully")
+	} else {
+		return fmt.Errorf("remove file failed")
 	}
 	return nil
 }

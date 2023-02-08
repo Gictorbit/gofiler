@@ -26,7 +26,7 @@ func (c *Client) FileInfo(shareCode string) error {
 	case pb.ResponseCode_RESPONSE_CODE_NOT_FOUND:
 		c.log.Println("share code not found")
 		c.PrintCode("NotFound")
-	case pb.ResponseCode_RESPONSE_CODE_FAILED:
+	default:
 		c.log.Println("get file info failed!!")
 	}
 	return nil
